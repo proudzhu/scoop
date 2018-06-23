@@ -119,7 +119,10 @@ $skip | Where-Object { $explicit_apps -contains $_} | ForEach-Object {
 }
 
 $suggested = @{};
-$apps | ForEach-Object { install_app $_ $architecture $global $suggested $use_cache $check_hash }
+$apps | ForEach-Object {
+    $fname = download_app $_ $architecture $global $suggested $use_cache $check_hash
+    install_app $_ $architecture $global $suggested $use_cache $check_hash $fname
+}
 
 show_suggestions $suggested
 

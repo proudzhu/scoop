@@ -120,7 +120,10 @@ function update($app, $global, $quiet = $false, $independent, $suggested, $use_c
     if(!$independent) {
         # check dependencies
         $deps = @(deps $app $architecture) | Where-Object { !(installed $_) }
-        $deps | ForEach-Object { install_app $_ $architecture $global $suggested $use_cache $check_hash }
+        $deps | ForEach-Object {
+            $fname = download_app $_ $architecture $global $suggested $use_cache $check_hash
+            install_app $_ $architecture $global $suggested $use_cache $check_hash $fname
+        }
     }
 
     $version = latest_version $app $bucket $url
@@ -148,6 +151,8 @@ function update($app, $global, $quiet = $false, $independent, $suggested, $use_c
 
     $dir = versiondir $app $old_version $global
 
+    $fname = download_app $_ $architecture $global $suggested $use_cache $check_hash
+
     write-host "Uninstalling '$app' ($old_version)"
     run_uninstaller $old_manifest $architecture $dir
     rm_shims $old_manifest $global $architecture
@@ -163,7 +168,7 @@ function update($app, $global, $quiet = $false, $independent, $suggested, $use_c
         # add bucket name it was installed from
         $app = "$bucket/$app"
     }
-    install_app $app $architecture $global $suggested $use_cache $check_hash
+    install_app $app $architecture $global $suggested $use_cache $check_hash $fname
 }
 
 if(!$apps) {
